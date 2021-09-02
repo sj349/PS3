@@ -1,0 +1,145 @@
+---
+title: "HW3"
+author: "Steph Jordan"
+output:
+  html_document:
+    df_print: paged
+---
+
+Loading necessary packages
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+Bringing in the data and taking a high level look at it
+
+```{r}
+data(txhousing)
+glimpse(txhousing)
+```
+
+## Question 1
+Wichita Falls is the last city listed in the dataset.
+
+## Question 2
+Listings is a numerical variables that measures the total number of active listings
+
+## Data Wrangling
+Selecting only sales and volume columns
+```{r}
+txhousing %>% select(sales, volume)
+```
+Selecting all columns that aren't "date"
+```{r}
+txhousing <- txhousing %>% select(-date)
+```
+
+Filtering for year is 2012, city is Austin
+```{r}
+austin_12 <- txhousing %>% filter(year == 2012, city == "Austin")
+```
+
+Filtering for years prior to 2004 in the city of Austin
+```{r}
+txhousing %>% filter(year < 2004, city == "Austin")
+```
+Filter for city is Austin OR city is Abilene
+```{r}
+aust_ab <- txhousing %>% filter(city == "Austin" | city == "Abilene")
+```
+
+Adding a new column that is the volume in units of $100,000
+```{r}
+txhousing <- txhousing %>%
+  mutate(vol_100k = volume/100000)
+```
+
+Obtaining a summary statistic (mean) of the sales column
+```{r}
+austin_12 %>% summarize(x_bar_sales = mean(sales))
+```
+Calculating multiple summary stats at once
+```{r}
+austin_12 %>% summarize(x_bar_sales = mean(sales), 
+                        sd_sales = sd(sales), 
+                        min_vol = min(volume), 
+                        max_vol = max(volume), 
+                        mdn_list = median(listings), 
+                        iqr_list = IQR(listings),
+                        sample_size = n())
+```
+Arranging data in descending order
+```{r}
+austin_12 %>%
+  arrange(desc(volume))
+```
+Grouping data by city
+```{r}
+aust_ab %>% group_by(city) %>% 
+  summarize(x_bar_sales = mean(sales))
+```
+
+Grouping by multiple variavles (city, month) and then summarizing
+```{r}
+aust_ab %>% group_by(city, month) %>% 
+  summarize(x_bar_sales = mean(sales))
+```
+## Question 3
+```{r}
+txhousing <- txhousing %>% select(-inventory)
+```
+
+## Question 4
+```{r}
+dallas_sub <- txhousing %>% filter(city=='Dallas' & (year==2012 | year==2013))
+dallas_sub
+```
+## Question 5
+```{r}
+dallas_sub <- dallas_sub %>%
+  mutate(prct_sold = sales/listings * 100)
+dallas_sub
+```
+## Question 6
+```{r}
+dallas_summary <- dallas_sub |> group_by(month) |> summarize(monthly_mean=mean(prct_sold))
+dallas_summary
+```
+## Question 7
+```{r}
+dallas_summary |> arrange(desc(monthly_mean))
+```
+
+## Question 8
+```{r}
+txhousing %>% 
+  filter(year == 2012 | year == 2013, city == "Dallas") %>%
+  mutate(prct_sold = sales/listings *100) %>%
+  group_by(month) %>%
+  summarize(mean_prct_sold = mean(prct_sold)) %>% 
+  arrange(desc(mean_prct_sold))
+```
+This code selects data with year equal to 2012 or 2013 within the city of Dallas. It calculates and adds a variable called percent sold (number of listings that successfully sold) to the table. It groups by month, and then calculates the average percent sold for each month. Lastly it arranges these values in descending order. In short, it does something very similar to what we just did in the 7 prior steps by combining them into 1. 
+
+## Question 9 
+
+San Marcos has the fewest sales (18).
+
+```{r}
+txhousing |> filter(month==1, year==2015) |> group_by(city) |> arrange(sales)
+```
+## Question 10
+The most houses sold in 2012 (7112) were sold in the month of August. 
+```{r}
+month_grouping <- txhousing |> filter(year==2012) |> group_by(month) |> summarize(max_sales=max(sales)) |> arrange(desc(max_sales))
+
+month_grouping
+```
+## Question 11
+
+```{r}
+dallas_austin <- txhousing |> filter(year==2000 | year==2001) |> group_by(city) |> summarize(city_sales_total=sum(sales)) |> filter(city=='Austin' | city== 'Dallas') 
+
+dallas_austin
+```
+
