@@ -85,32 +85,38 @@ aust_ab %>% group_by(city, month) %>%
   summarize(x_bar_sales = mean(sales))
 ```
 ## Question 3
+Selecting all rows but inventory.
 ```{r}
 txhousing <- txhousing %>% select(-inventory)
 ```
 
 ## Question 4
+Filtering for city of Dallas, and years 2012 and 2013. 
 ```{r}
 dallas_sub <- txhousing %>% filter(city=='Dallas' & (year==2012 | year==2013))
 dallas_sub
 ```
 ## Question 5
+Creating a variable that reflects the percent of listings that sold. 
 ```{r}
 dallas_sub <- dallas_sub %>%
   mutate(prct_sold = sales/listings * 100)
 dallas_sub
 ```
 ## Question 6
+Finding average percent sold for each month.
 ```{r}
 dallas_summary <- dallas_sub |> group_by(month) |> summarize(monthly_mean=mean(prct_sold))
 dallas_summary
 ```
 ## Question 7
+Sorting average percent sold in descending order. August had the greatest percent sold on average in Dallas from 2012-2013. 
 ```{r}
 dallas_summary |> arrange(desc(monthly_mean))
 ```
 
 ## Question 8
+
 ```{r}
 txhousing %>% 
   filter(year == 2012 | year == 2013, city == "Dallas") %>%
@@ -136,6 +142,7 @@ month_grouping <- txhousing |> filter(year==2012) |> group_by(month) |> summariz
 month_grouping
 ```
 ## Question 11
+Table demonstrates  the total number of houses sold in Austin and Dallas in 2000 and 2001.
 
 ```{r}
 dallas_austin <- txhousing |> filter(year==2000 | year==2001) |> group_by(city) |> summarize(city_sales_total=sum(sales)) |> filter(city=='Austin' | city== 'Dallas') 
